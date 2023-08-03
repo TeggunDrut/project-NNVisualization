@@ -171,8 +171,7 @@ class Matrix {
   }
   subtract(matrix) {
     for (let i = 0; i < this.rows; i++)
-      for (let j = 0; j < this.cols; j++)
-        this.data[i][j] -= matrix.data[i][j];
+      for (let j = 0; j < this.cols; j++) this.data[i][j] -= matrix.data[i][j];
   }
 
   map(func) {
@@ -219,5 +218,47 @@ class Matrix {
     for (let i = 0; i < this.rows; i++)
       for (let j = 0; j < this.cols; j++) arr.push(this.data[i][j]);
     return arr;
+  }
+  // Element-wise power operation
+  static pow(matrix, power) {
+    let newmat = new Matrix(matrix.rows, matrix.cols);
+    for (let i = 0; i < matrix.rows; i++) {
+      for (let j = 0; j < matrix.cols; j++) {
+        newmat.data[i][j] = Math.pow(matrix.data[i][j], power);
+      }
+    }
+    return newmat;
+  }
+
+  // Element-wise square root operation
+  static sqrt(matrix) {
+    let newmat = new Matrix(matrix.rows, matrix.cols);
+    for (let i = 0; i < matrix.rows; i++) {
+      for (let j = 0; j < matrix.cols; j++) {
+        newmat.data[i][j] = Math.sqrt(matrix.data[i][j]);
+      }
+    }
+    return newmat;
+  }
+
+  // Element-wise division
+  static divide(m1, m2) {
+    if (
+      m1 instanceof Matrix &&
+      m2 instanceof Matrix &&
+      m1.rows == m2.rows &&
+      m1.cols == m2.cols
+    ) {
+      let newmat = new Matrix(m1.rows, m1.cols);
+      for (let i = 0; i < m1.rows; i++) {
+        for (let j = 0; j < m1.cols; j++) {
+          newmat.data[i][j] = m1.data[i][j] / m2.data[i][j];
+        }
+      }
+      return newmat;
+    } else {
+      console.error("Size mismatch in element-wise division!");
+      return -1;
+    }
   }
 }

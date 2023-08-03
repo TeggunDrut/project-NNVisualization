@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,16 +9,19 @@
     integrity="sha512-lqXu8Lu4KQXMNAVo/X/3EWoRoL4aYErKld20g77Xh2NiAoFM5krIzUayEvBeVvORuFR4NWqyDqP8scYzXcguAw=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
-    html, body {
+    html,
+    body {
       height: 100%;
       margin: 0;
       overflow: hidden;
       font-family: "Roboto", sans-serif;
     }
+
     body {
       display: flex;
       flex-direction: row;
     }
+
     .name {
       position: absolute;
       top: 0;
@@ -28,14 +32,16 @@
       font-family: "Roboto", sans-serif;
       margin: 20px;
     }
+
     .layer {
       height: 100%;
       position: relative;
       display: grid;
-      width: 100%;
+      width: 15%;
       /* grid-template-columns: repeat(10, 1fr); */
       background-color: #f5f5f5;
     }
+
     .neuron {
       position: relative;
       width: 40px;
@@ -48,7 +54,8 @@
       left: 0;
       margin: auto;
     }
-    .neuron > .value {
+
+    .neuron>.value {
       position: absolute;
       top: 0;
       right: 0;
@@ -59,6 +66,7 @@
       height: 50%;
       font-size: calc(1rem + 1vw);
     }
+
     .connection {
       height: 3px;
       position: absolute;
@@ -74,11 +82,125 @@
     }
   </style>
 </head>
+
 <body>
+  <button id="stop">Stop</button>
+  `
+  <script>
+    let recordButton = document.getElementById('recordButton');
+    let mediaRecorder;
+    let chunks = [];
+    let audioStream;
+    let dataPollingInterval; // interval for data polling
+
+    let audioContext;
+    let analyser;
+
+    const bufferLength = 16;
+    const dataArray = new Uint8Array(bufferLength);
+    const data = [];
+    let stop = true;
+
+    function updateAudioData() {
+      requestAnimationFrame(updateAudioData);
+
+      if (stop) {
+        return;
+      }
+      // Get the current audio data
+      analyser.getByteFrequencyData(dataArray);
+      // Update and display the audio data
+      data.push(dataArray.slice());
+    }
+    // Preprocess function for live audio data
+    function preprocessAudioData(audioData, frameSize) {
+      const frames = [];
+
+      // Divide the audio data into frames
+      for (let i = 0; i < audioData.length; i += frameSize) {
+        const frame = audioData.slice(i, i + frameSize);
+        frames.push(frame);
+      }
+
+      // Apply Fourier Transform to each frame
+      const transformedFrames = frames.map(frame => applyFourierTransform(frame));
+
+      return transformedFrames;
+    }
+
+    // Function to apply Fourier Transform to a frame
+    function applyFourierTransform(frame) {
+      // Perform Fourier Transform on the frame
+      // Replace this with your own implementation or library
+
+      // Example using Web Audio API's AnalyserNode
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = frame.length;
+
+      const buffer = new Float32Array(analyser.fftSize);
+      for (let i = 0; i < frame.length; i++) {
+        buffer[i] = frame[i];
+      }
+
+      analyser.getFloatFrequencyData(buffer);
+
+      return buffer;
+    }
+
+    // Usage example
+    const frameSize = 128;
+
+    document.getElementById('stop').addEventListener('click', () => {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function (stream) {
+          const audioSource = audioContext.createMediaStreamSource(stream);
+          audioSource.connect(analyser);
+
+        })
+        .catch(function (err) {
+          console.error('Error accessing microphone', err);
+        });
+
+      updateAudioData();
+
+      if (!stop) {
+        console.log(data);
+        let name = prompt("Enter name");
+        let obj = {
+          name: name,
+          data: flatten(data),
+        }
+        saved.push(obj);
+      }
+      stop = !stop;
+    });
+
+    function flatten(arr) {
+      let newArr = [];
+      for (let i = 0; i < arr.length; i++) {
+        newArr.push(...arr[i]);
+      }
+      return newArr;
+    }
+
+  </script>
   <!-- <button type="button" id="addNeuron">Add Neuron</button> -->
+  <script src="saved.js"></script>
+  <script src="clips.js"></script>
+  <script src="words.js"></script>
+
   <script src="matrix.js"></script>
-  <script src="nn.js"></script>
+  <script src="Connection.js"></script>
+  <script src="Neuron.js"></script>
+  <script src="Layer.js"></script>
+  <script src="NeuralNetwork.js"></script>
+  <script src="util.js"></script>
   <!-- <script src="util.js"></script> -->
   <script src="main.js"></script>
+
 </body>
+
 </html>
